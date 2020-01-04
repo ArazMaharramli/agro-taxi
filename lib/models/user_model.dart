@@ -3,20 +3,23 @@ class UserModel {
   String profilePictureUrl;
   String city;
   String phoneNumber;
+  int rating;
   String uid;
   UserModel(
       {this.fullname,
       this.profilePictureUrl,
       this.city,
       this.phoneNumber,
+      this.rating,
       this.uid});
 
-  Map<String, String> toMap() {
+  Map<String, dynamic> toMap() {
     return {
       "FullName": this.fullname,
       "ProfilePictureUrl": this.profilePictureUrl,
       "City": this.city,
-      "PhoneNumber": this.phoneNumber
+      "PhoneNumber": this.phoneNumber,
+      "Rating": rating!=null? rating :0,
     };
   }
 

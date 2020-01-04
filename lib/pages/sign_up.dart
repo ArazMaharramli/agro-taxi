@@ -3,7 +3,6 @@ import 'package:agrotaxi/pages/add_or_edit_user_details.dart';
 import 'package:agrotaxi/routers/user_init.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignUpPage extends StatefulWidget {
   SignUpPage({Key key}) : super(key: key);
@@ -181,12 +180,12 @@ class _SignUpPageState extends State<SignUpPage> {
     //   smsCode: smsCode,
     // );
     await FirebaseAuth.instance.signInWithCredential(credential).then((user) {
-      var storage = new FlutterSecureStorage();
-      storage.write(key: "user_uid", value: user.user.uid).then((onValue) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => AddOrEditUserDetails(
-                uid: user.user.uid, phoneNumber: user.user.phoneNumber)));
-      });
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (BuildContext context) => AddOrEditUserDetails(
+              uid: user.user.uid, phoneNumber: user.user.phoneNumber),
+        ),
+      );
     }).catchError((e) {
       print(e);
       _scaffoldStateKey.currentState.showSnackBar(
@@ -271,7 +270,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   void dispose() {
-    _scaffoldStateKey.currentState.dispose();
+    // _scaffoldStateKey.currentState.dispose();
     super.dispose();
   }
 }

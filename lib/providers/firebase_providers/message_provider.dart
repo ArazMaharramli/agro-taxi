@@ -6,7 +6,7 @@ class MessageProvider {
     try {
       var doc = await Firestore.instance
           .collection("Messages")
-          .document(_messageModel.sendBy.uid)
+          .document(_messageModel.sendBy.phoneNumber)
           .get();
       Map<String, dynamic> newData = {
         "HasNewMessage": true,
@@ -21,14 +21,14 @@ class MessageProvider {
 
         await Firestore.instance
             .collection("Messages")
-            .document(_messageModel.sendBy.uid)
+            .document(_messageModel.sendBy.phoneNumber)
             .updateData(newData);
         print(_messageModel.messageText + "  is written to firestore");
       } else {
         newData["Messages"] = [_messageModel.toMap()];
         await Firestore.instance
             .collection("Messages")
-            .document(_messageModel.sendBy.uid)
+            .document(_messageModel.sendBy.phoneNumber)
             .setData(newData);
       }
 
@@ -39,9 +39,9 @@ class MessageProvider {
     }
   }
 
-  Future<List<MessageModel>> getMessages(String uid) async {
+  Future<List<MessageModel>> getMessages(String phoneNumber) async {
     var messagesDoc =
-        await Firestore.instance.collection("Messages").document(uid).get();
+        await Firestore.instance.collection("Messages").document(phoneNumber).get();
     if (messagesDoc.exists && messagesDoc.data.isNotEmpty) {
       List<MessageModel> messages =
           List.generate(messagesDoc.data["Messages"].length, (index) {

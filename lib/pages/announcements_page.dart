@@ -1,4 +1,6 @@
+import 'package:agrotaxi/custom_widgets/announcement_widget.dart';
 import 'package:agrotaxi/models/announce_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class AnnouncementsPage extends StatefulWidget {
@@ -8,15 +10,40 @@ class AnnouncementsPage extends StatefulWidget {
     return _AnnouncementsPageState();
   }
 }
-class _AnnouncementsPageState extends State<AnnouncementsPage> {
 
+class _AnnouncementsPageState extends State<AnnouncementsPage> {
   final modalBottomSheetFormKey = new GlobalKey<FormState>();
 
   AnnounceModel announceModel = new AnnounceModel();
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text("Announcements"),
+      child: StreamBuilder(
+        stream: Firestore.instance
+            .collection("Announcements")
+            .orderBy("CreationDate", descending: true)
+            .snapshots(),
+        // initialData: initialData ,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting ||
+              !snapshot.hasData) {
+            return Column(
+              children: [
+                LinearProgressIndicator(),
+              ],
+            );
+          }
+          return ListView.builder(
+            itemCount: snapshot.data.documents.length,
+            itemBuilder: (context, index) {
+              return AnnouncementWidget(
+                model:
+                    AnnounceModel.formJson(snapshot.data.documents[index].data),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -107,7 +134,6 @@ class _AnnouncementsPageState extends State<AnnouncementsPage> {
                           // });
                           modalBottomSheetFormKey.currentState.save();
                           Navigator.pop(context);
-                          
                         },
                       ),
                     ],

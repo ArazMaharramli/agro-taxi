@@ -1,4 +1,4 @@
-import 'package:agrotaxi/pages/add_or_edit_user_details.dart';
+import 'package:agrotaxi/custom_widgets/add_announcement_Widget.dart';
 import 'package:agrotaxi/pages/announcements_page.dart';
 import 'package:agrotaxi/pages/sign_up.dart';
 import 'package:agrotaxi/pages/support_page.dart';
@@ -36,6 +36,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   TabController _bottomNavBarController;
 
   List<Widget> _bottomNavBarItems = [
@@ -49,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage>
     super.initState();
 
     _bottomNavBarController = TabController(
-        vsync: this, length: _bottomNavBarItems.length, initialIndex: 1);
+        vsync: this, length: _bottomNavBarItems.length, initialIndex: 0);
     _bottomNavBarController
       ..addListener(() {
         setState(() {});
@@ -59,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Container(
@@ -72,11 +74,19 @@ class _MyHomePageState extends State<MyHomePage>
         ),
         centerTitle: true,
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add,color: Theme.of(context).accentColor,),
-            onPressed: ()=>AnnouncementsPage(),
-          ),
-          
+          _bottomNavBarController.index == 0
+              ? IconButton(
+                  icon: Icon(
+                    Icons.add,
+                    color: Theme.of(context).accentColor,
+                  ),
+                  onPressed: () {
+                    _scaffoldKey.currentState.showBottomSheet((context) {
+                      return AddAnnouncementWidget();
+                    });
+                  },
+                )
+              : Container(),
         ],
       ),
       body: TabBarView(
@@ -87,10 +97,12 @@ class _MyHomePageState extends State<MyHomePage>
         currentIndex: _bottomNavBarController.index,
         type: BottomNavigationBarType.fixed,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), title: Text("Elanlar")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home), title: Text("Elanlar")),
           BottomNavigationBarItem(
               icon: Icon(Icons.live_help), title: Text("Əlaqə")),
-          BottomNavigationBarItem(icon: Icon(Icons.person), title: Text("Profil")),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person), title: Text("Profil")),
         ],
         onTap: (index) {
           setState(() {

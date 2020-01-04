@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:agrotaxi/models/user_model.dart';
 import 'package:agrotaxi/providers/firebase_providers/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../main.dart';
 
@@ -17,7 +20,6 @@ class _AddOrEditUserDetailsState extends State<AddOrEditUserDetails> {
 
   final UserProvider _userProvider = new UserProvider();
 
-
   final _formStateKey = new GlobalKey<FormState>();
   final _scaffoldStateKey = new GlobalKey<ScaffoldState>();
 
@@ -27,11 +29,11 @@ class _AddOrEditUserDetailsState extends State<AddOrEditUserDetails> {
   @override
   void initState() {
     super.initState();
-    _userProvider.getUserDetails(widget.uid).then((model) {
+    _userProvider.getUserDetails(widget.phoneNumber).then((model) {
       if (model != null) {
         setState(() {
           this._userModel = model;
-          _fullnameFieldController.text =_userModel.fullname;
+          _fullnameFieldController.text = _userModel.fullname;
           _cityFieldController.text = _userModel.city;
         });
       }
@@ -130,12 +132,19 @@ class _AddOrEditUserDetailsState extends State<AddOrEditUserDetails> {
                         _userProvider
                             .editUserDetails(_userModel)
                             .then((onValue) {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (context) {
-                              return new MyHomePage();
-                            }),
-                            ModalRoute.withName('/'),
-                          );
+                          var storage = new FlutterSecureStorage();
+                          storage
+                              .write(
+                            key: "userDetails",
+                            value: json.encode(_userModel.toMap()))
+                              .then((onValue) {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (context) {
+                                return new MyHomePage();
+                              }),
+                              ModalRoute.withName('/'),
+                            );
+                          });
                         });
                       },
                     )
@@ -151,8 +160,8 @@ class _AddOrEditUserDetailsState extends State<AddOrEditUserDetails> {
 
   @override
   void dispose() {
-    _formStateKey.currentState.dispose();
-    _scaffoldStateKey.currentState.dispose();
+    // _formStateKey.currentState.dispose();
+    // _scaffoldStateKey.currentState.dispose();
     super.dispose();
   }
 }

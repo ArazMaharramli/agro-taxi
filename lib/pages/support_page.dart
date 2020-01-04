@@ -38,7 +38,7 @@ class _HomePageState extends State<MessagesView> {
   MessageModel newMessage = new MessageModel();
   MessageProvider _messageProvider = new MessageProvider();
   List<MessageModel> _messages = new List<MessageModel>();
-  String uid;
+  //String uid;
   final ScrollController _scrollController = new ScrollController();
   final TextEditingController _textEditingController =
       new TextEditingController();
@@ -47,23 +47,23 @@ class _HomePageState extends State<MessagesView> {
   @override
   void initState() {
     super.initState();
-    UserInit().isRegistered().then((uid) {
-      this.uid = uid;
+    UserInit().isRegistered().then((phoneNumber) {
+      //this.uid = uid;
 
       UserProvider _userProvider = new UserProvider();
-      _userProvider.getUserDetails(uid).then((userModel) {
+      _userProvider.getUserDetails(phoneNumber).then((userModel) {
         newMessage.sendBy = userModel;
-        newMessage.sendBy.uid = uid;
-      });
 
-      _getMessages().then((onValue) {
-        setState(() {});
+        _getMessages().then((onValue) {
+          setState(() {});
+        });
       });
     });
   }
 
   Future<void> _getMessages() async {
-    var msgs = await _messageProvider.getMessages(uid);
+    var msgs =
+        await _messageProvider.getMessages(newMessage.sendBy.phoneNumber);
     _messages = msgs.reversed.toList();
     return;
   }

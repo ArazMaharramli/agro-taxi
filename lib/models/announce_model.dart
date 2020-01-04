@@ -1,90 +1,76 @@
+import 'package:agrotaxi/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class AnnounceModel {
   String announceName;
-  String city;
-  String announcerFullName;
   String message;
-  String announcerPhone;
-  List<PriceSuggestionsModel> priceSuggestions =
-      new List<PriceSuggestionsModel>();
+  UserModel announcerDetails;
+  Timestamp creationDate;
+  PriceSuggestionListModel priceSuggestions = new PriceSuggestionListModel();
 
   String docId;
   int index;
+
   AnnounceModel({
     this.announceName,
-    this.announcerFullName,
-    this.city,
     this.message,
     this.priceSuggestions,
-    this.announcerPhone,
+    this.announcerDetails,
     this.docId,
     this.index,
+    this.creationDate
   });
+
+  AnnounceModel.formJson(json) {
+    announceName = json["AnnounceName"];
+    message = json["Message"];
+    creationDate = json["CreationDate"];
+    announcerDetails = UserModel.fromJson(json["AnnouncerDetails"]);
+    priceSuggestions =
+        PriceSuggestionListModel.fromJson(json["PriceSuggestions"]);
+  }
 
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> map = {
-      "announceName": announceName,
-      "AnnouncerFullName": announcerFullName,
-      "AnnouncerPhone": announcerPhone,
+      "AnnounceName": announceName,
+      "AnnouncerDetails": announcerDetails.toMap(),
       "Message": message,
-      "City": city,
-      "PriceSuggestions": priceSuggestions.length == 0
-          ? []
-          : List.generate(priceSuggestions.length,
-              (index) => priceSuggestions[index].toMap())
+      "PriceSuggestions": priceSuggestions.toMap(),
+      "CreationDate": creationDate,
     };
     return map;
   }
+}
 
-  List<AnnounceModel> fromStream(doc) {
-    List<AnnounceModel> announceItems = new List<AnnounceModel>();
-    int index = 0;
-    for (var announce in doc.data["announces"]) {
-      index++;
-      List<PriceSuggestionsModel> priceSuggestions =
-          new List<PriceSuggestionsModel>();
-      try {
-        for (var item in announce["PriceSuggestions"]) {
-          priceSuggestions.add(PriceSuggestionsModel.fromJson(item));
-        }
-      } catch (e) {
-        print("++++++++++++++++++++++++ " + e.toString());
-        throw e;
-      }
+class PriceSuggestionListModel {
+  List<PriceSuggestionModel> suggestions;
+  PriceSuggestionListModel({this.suggestions}) {
+    suggestions = [];
+  }
 
-      AnnounceModel model = new AnnounceModel(
-          docId: doc.documentID,
-          index: index,
-          announceName: announce["announceName"],
-          announcerFullName: announce["AnnouncerFullName"],
-          city: announce["City"],
-          message: announce["Message"],
-          priceSuggestions: priceSuggestions);
-      announceItems.add(model);
+  PriceSuggestionListModel.fromJson(json) {
+    // Map data = json.decode(json);
+    for (var item in json) {
+      suggestions.add(PriceSuggestionModel.fromJson(item));
     }
-    return announceItems;
+  }
+  List toMap() {
+    return suggestions.length == 0
+        ? []
+        : List.generate(
+            suggestions.length, (index) => suggestions[index].toMap());
   }
 }
 
-class PriceSuggestionsModel {
-  String fullName;
+class PriceSuggestionModel {
+  UserModel user;
   String suggestion;
-  String rating;
+  Timestamp postedAt;
 
-  PriceSuggestionsModel({
-    this.fullName,
-    this.rating,
-    this.suggestion,
-  });
-  PriceSuggestionsModel.fromJson(Map json) {
-    if (json.containsKey('FullName')) {
-      fullName = json['FullName'].toString();
-    } else {
-      fullName = "Example";
-    }
-    if (json.containsKey('Rating')) {
-      rating = json['Rating'].toString();
-    } else {
-      rating = "1";
+  PriceSuggestionModel({this.user, this.suggestion, this.postedAt});
+  PriceSuggestionModel.fromJson(Map json) {
+    if (json.containsKey('User')) {
+      user = UserModel.fromJson(json['User']);
     }
 
     if (json.containsKey('Suggestion')) {
@@ -92,11 +78,14 @@ class PriceSuggestionsModel {
     } else {
       suggestion = "000";
     }
-
-    // print("+++++++++___________-  ${fullName.runtimeType} ${suggestion.runtimeType} ${rating.runtimeType}");
+    postedAt = json['PostedAt'];
   }
 
   Map<String, dynamic> toMap() {
-    return {"FullName": fullName, "Rating": rating??"2", "Suggestion": suggestion};
+    return {
+      "User": user.toMap(),
+      "Suggestion": suggestion,
+      "PostedAt": postedAt
+    };
   }
 }
